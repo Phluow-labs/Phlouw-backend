@@ -34,6 +34,16 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// Endpoint to add multiple products at once
+router.post("/bulk", async (req, res) => {
+  try {
+    const savedProducts = await Product.insertMany(req.body);
+    res.status(201).json(savedProducts);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 // Update a product
 router.put("/:id", async (req, res) => {
   try {
