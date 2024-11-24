@@ -10,6 +10,7 @@ const orderSchema = new mongoose.Schema({
       number: { type: Number, required: true },
     },
   ],
+  totalPrice:{ type: Number, required: true },
   deliveryStatus: { type: String, default: "Pending" },
   dateCreated: { type: Date, default: Date.now },
   dateModified: { type: Date },
