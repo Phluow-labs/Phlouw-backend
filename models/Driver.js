@@ -6,6 +6,7 @@ const driverSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   carNumber: { type: String, required: true },
   region: { type: String, required: true },
+  location:{ type: String, required: true },
 });
 
 module.exports = mongoose.model("Driver", driverSchema);
