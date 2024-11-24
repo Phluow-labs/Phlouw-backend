@@ -3,6 +3,7 @@ const crypto = require("crypto"); // For generating unique IDs
 
 const orderSchema = new mongoose.Schema({
   orderId: { type: String, unique: true }, // Unique order ID
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   driverId: { type: mongoose.Schema.Types.ObjectId, ref: "Driver", required: true },
   products: [
     {
