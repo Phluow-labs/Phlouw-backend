@@ -9,7 +9,7 @@ const driverRoutes = require("./routes/driverRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const productRoutes = require("./routes/productRoutes");
 const pickupRoutes = require("./routes/pickupRoutes")
-
+const authenticateFirebaseToken = require("./middleware/authenticateFirebaseToken");
 dotenv.config();
 
 const app = express();
@@ -19,10 +19,10 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
-app.use("/api/users", userRoutes);
+app.use("/api/users",userRoutes);
 app.use("/api/drivers", driverRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/products", productRoutes);
+app.use("/api/orders", authenticateFirebaseToken,orderRoutes);
+app.use("/api/products",authenticateFirebaseToken, productRoutes);
 app.use('/api/pickups', pickupRoutes);
 // MongoDB Connection
 mongoose
