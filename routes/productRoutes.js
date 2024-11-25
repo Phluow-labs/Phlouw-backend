@@ -1,7 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
+const authenticateUser = require("../middleware/authenticateFirebaseToken");
 
+router.use(authenticateUser); // Protect all routes
 // Create a new product
 router.post("/", async (req, res) => {
   try {
