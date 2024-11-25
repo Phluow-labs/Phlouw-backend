@@ -24,6 +24,11 @@ app.use("/api/drivers", driverRoutes);
 app.use("/api/orders", authenticateFirebaseToken,orderRoutes);
 app.use("/api/products",authenticateFirebaseToken, productRoutes);
 app.use('/api/pickups', pickupRoutes);
+app.use((err, req, res, next) => {
+  console.error("Server error:", err.message);
+  res.status(500).json({ error: err.message });
+});
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
