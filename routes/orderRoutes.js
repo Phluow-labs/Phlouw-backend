@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
-const authenticateUser = require("../middleware/authenticateUser");
+const authenticateUser = require("../middleware/authenticateFirebaseToken");
 
 router.use(authenticateUser); // Protect all routes
 
