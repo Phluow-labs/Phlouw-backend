@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
+// Getting products by Id
 router.get("/:id", async (req, res) => {
   try {
     const userId = req.user.uid;
