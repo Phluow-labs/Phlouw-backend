@@ -18,7 +18,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get an order by ID for the current user
 router.get("/:id", async (req, res) => {
   try {
     const userId = req.user.uid;
