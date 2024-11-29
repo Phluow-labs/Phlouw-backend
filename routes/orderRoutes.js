@@ -37,7 +37,7 @@ router.get("/:id", async (req, res) => {
 // Create a new order
 router.post("/", async (req, res) => {
   try {
-    const order = new Order({ ...req.body, userId: req.user.uid });
+    const order = new Order({ ...req.body });
     const savedOrder = await order.save();
     res.status(201).json(savedOrder);
   } catch (error) {
