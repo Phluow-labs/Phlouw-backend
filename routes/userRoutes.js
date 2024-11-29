@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
   const { fullName, code } = req.body;
 
   try {
-    const driver = await Driver.findOne({ fullName, code });
+    const driver = await User.findOne({ fullName, code });
     if (!driver) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
