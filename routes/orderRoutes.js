@@ -8,7 +8,7 @@ router.use(authenticateUser); // Protect all routes
 // Get all orders for the current user
 router.get("/", async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.uid;
     const orders = await Order.find({ userId })
       .populate("driverId")
       .populate("products.productId");
@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
 // Get an order by ID for the current user
 router.get("/:id", async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.uid;
     const order = await Order.findOne({ _id: req.params.id, userId })
       .populate("driverId")
       .populate("products.productId");
@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
 // Update an order
 router.put("/:id", async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.uid;
     const updatedOrder = await Order.findOneAndUpdate(
       { _id: req.params.id, userId },
       { ...req.body, dateModified: Date.now() },
@@ -64,7 +64,7 @@ router.put("/:id", async (req, res) => {
 // Delete an order
 router.delete("/:id", async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.uid;
     const deletedOrder = await Order.findOneAndDelete({ _id: req.params.id, userId });
     if (!deletedOrder) return res.status(404).json({ message: "Order not found" });
     res.json({ message: "Order deleted successfully" });
