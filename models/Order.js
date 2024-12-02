@@ -24,6 +24,7 @@ const orderSchema = new mongoose.Schema({
   dateCreated: { type: Date, default: Date.now },
   dateModified: { type: Date },
   additionalInfo: { type: String },
+  location:{ type: String, required: true },
 });
 
 // Pre-save hook to generate unique orderId
