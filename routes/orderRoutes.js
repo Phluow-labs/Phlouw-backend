@@ -3,7 +3,15 @@ const router = express.Router();
 const Order = require("../models/Order");
 const authenticateUser = require("../middleware/authenticateFirebaseToken");
 
-router.use(authenticateUser); 
+// Ensure that WebSocket io instance is passed in this route file
+let io; // Declare a variable for the WebSocket io instance
+
+// Add a setter for io
+const setIoInstance = (socketIoInstance) => {
+  io = socketIoInstance; // Set io from the server file
+};
+
+router.use(authenticateUser);
 
 // Get all orders for the current user
 router.get("/", async (req, res) => {
@@ -17,6 +25,7 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 // Getting products by Id
 router.get("/:id", async (req, res) => {
   try {
@@ -38,6 +47,12 @@ router.post("/", async (req, res) => {
   try {
     const order = new Order({ ...req.body });
     const savedOrder = await order.save();
+
+    // Emit the new order to all connected WebSocket clients
+    if (io) {
+      io.emit("newOrder", { order: savedOrder }); // Emit event with the new order data
+    }
+
     res.status(201).json(savedOrder);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -72,4 +87,5 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-module.exports = router;
+// Export the setter function to set the WebSocket instance
+module.exports = { router, setIoInstance };

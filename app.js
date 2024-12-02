@@ -3,27 +3,39 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const http = require("http");
+const socketIo = require("socket.io");
 
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
-const orderRoutes = require("./routes/orderRoutes");
+const { router: orderRoutes, setIoInstance } = require("./routes/orderRoutes"); // Import the order routes and setter
 const productRoutes = require("./routes/productRoutes");
-const pickupRoutes = require("./routes/pickupRoutes")
+const pickupRoutes = require("./routes/pickupRoutes");
 const authenticateFirebaseToken = require("./middleware/authenticateFirebaseToken");
+
 dotenv.config();
 
 const app = express();
+
+// Create HTTP server for WebSocket
+const server = http.createServer(app);
+
+// Create WebSocket instance
+const io = socketIo(server);
+
+// Set io instance in the order routes
+setIoInstance(io); // Pass the io instance to the order routes
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
 // Routes
-app.use("/api/users",userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/drivers", driverRoutes);
-app.use("/api/orders", authenticateFirebaseToken,orderRoutes);
-app.use("/api/products",authenticateFirebaseToken, productRoutes);
-app.use('/api/pickups', pickupRoutes);
+app.use("/api/orders", authenticateFirebaseToken, orderRoutes); // Use the orderRoutes with WebSocket
+app.use("/api/products", authenticateFirebaseToken, productRoutes);
+app.use("/api/pickups", pickupRoutes);
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message);
   res.status(500).json({ error: err.message });
@@ -35,6 +47,6 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error(err));
 
-  // Creating the port 
+// Start the server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
