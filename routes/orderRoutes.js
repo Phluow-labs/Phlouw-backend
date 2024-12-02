@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
 const authenticateUser = require("../middleware/authenticateFirebaseToken");
-
+const { sendOrderToDriver } = require("../socketHandler"); // Import only the specific function needed
 
 router.use(authenticateUser);
 
@@ -41,23 +41,15 @@ router.post("/", async (req, res) => {
     const order = new Order({ ...req.body });
     const savedOrder = await order.save();
 
-    // Find the driver associated with the order and send the order to them
+    // Send the order to the driver using the WebSocket function
     const driverId = savedOrder.driverId; // Assuming the order has a driverId field
-    const socketId = driverSockets[driverId]; // Retrieve the socketId for the driver
-
-    if (socketId && io) {
-      io.to(socketId).emit("newOrder", { order: savedOrder }); // Emit to the specific driver
-      console.log(`New order sent to driver: ${driverId}`);
-    } else {
-      console.log(`Driver ${driverId} not connected or no socketId found`);
-    }
+    sendOrderToDriver(driverId, savedOrder);
 
     res.status(201).json(savedOrder);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
 });
-
 // Update an order
 router.put("/:id", async (req, res) => {
   try {

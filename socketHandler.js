@@ -1,24 +1,26 @@
-// socketHandler.js
-
 let io;
 let driverSockets = {}; // Map to store driverId to socketId mappings
 
-// Add a setter for io
 const setIoInstance = (socketIoInstance) => {
   io = socketIoInstance;
 };
 
-// Listen for driver connections and store their socketId by driverId
 const initializeSocketHandlers = () => {
-  io.on('connection', (socket) => {
-    console.log('A driver connected:', socket.id);
+  if (!io) {
+    throw new Error("Socket.io instance is not set. Call setIoInstance first.");
+  }
 
-    socket.on('registerDriver', (driverId) => {
+  io.on("connection", (socket) => {
+    console.log("A driver connected:", socket.id);
+
+    // Listen for when a driver registers their driverId
+    socket.on("registerDriver", (driverId) => {
       driverSockets[driverId] = socket.id; // Store the socketId by driverId
       console.log(`Driver ${driverId} registered with socket ID: ${socket.id}`);
     });
 
-    socket.on('disconnect', () => {
+    // Handle driver disconnection
+    socket.on("disconnect", () => {
       for (let driverId in driverSockets) {
         if (driverSockets[driverId] === socket.id) {
           delete driverSockets[driverId];
@@ -30,5 +32,14 @@ const initializeSocketHandlers = () => {
   });
 };
 
-// Export the setter and the socket handler
-module.exports = { setIoInstance, initializeSocketHandlers };
+const sendOrderToDriver = (driverId, order) => {
+  const socketId = driverSockets[driverId];
+  if (socketId && io) {
+    io.to(socketId).emit("newOrder", { order });
+    console.log(`New order sent to driver: ${driverId}`);
+  } else {
+    console.log(`Driver ${driverId} not connected or no socketId found`);
+  }
+};
+
+module.exports = { setIoInstance, initializeSocketHandlers, sendOrderToDriver };
