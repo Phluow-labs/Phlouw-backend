@@ -3,13 +3,37 @@ const router = express.Router();
 const Order = require("../models/Order");
 const authenticateUser = require("../middleware/authenticateFirebaseToken");
 
-// Ensure that WebSocket io instance is passed in this route file
-let io; // Declare a variable for the WebSocket io instance
+// Declare a variable for the WebSocket io instance and a map to track driver sockets
+let io;
+let driverSockets = {}; // Map to store driverId to socketId mappings
 
 // Add a setter for io
 const setIoInstance = (socketIoInstance) => {
-  io = socketIoInstance; // Set io from the server file
+  io = socketIoInstance;
 };
+
+// Listen for driver connections and store their socketId by driverId
+io.on('connection', (socket) => {
+  console.log('A driver connected:', socket.id);
+
+  // Listen for when a driver registers their driverId
+  socket.on('registerDriver', (driverId) => {
+    driverSockets[driverId] = socket.id; // Store the socketId by driverId
+    console.log(`Driver ${driverId} registered with socket ID: ${socket.id}`);
+  });
+
+  // Handle driver disconnection
+  socket.on('disconnect', () => {
+    // Find and remove the driver from the driverSockets map
+    for (let driverId in driverSockets) {
+      if (driverSockets[driverId] === socket.id) {
+        delete driverSockets[driverId];
+        console.log(`Driver ${driverId} disconnected`);
+        break;
+      }
+    }
+  });
+});
 
 router.use(authenticateUser);
 
@@ -26,7 +50,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Getting products by Id
+// Get order by Id
 router.get("/:id", async (req, res) => {
   try {
     const userId = req.user.uid;
@@ -48,9 +72,15 @@ router.post("/", async (req, res) => {
     const order = new Order({ ...req.body });
     const savedOrder = await order.save();
 
-    // Emit the new order to all connected WebSocket clients
-    if (io) {
-      io.emit("newOrder", { order: savedOrder }); // Emit event with the new order data
+    // Find the driver associated with the order and send the order to them
+    const driverId = savedOrder.driverId; // Assuming the order has a driverId field
+    const socketId = driverSockets[driverId]; // Retrieve the socketId for the driver
+
+    if (socketId && io) {
+      io.to(socketId).emit("newOrder", { order: savedOrder }); // Emit to the specific driver
+      console.log(`New order sent to driver: ${driverId}`);
+    } else {
+      console.log(`Driver ${driverId} not connected or no socketId found`);
     }
 
     res.status(201).json(savedOrder);

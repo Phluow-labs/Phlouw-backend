@@ -8,7 +8,7 @@ const socketIo = require("socket.io");
 
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
-const { router: orderRoutes, setIoInstance } = require("./routes/orderRoutes"); // Import the order routes and setter
+const { router: orderRoutes, setIoInstance } = require("./routes/orderRoutes");
 const productRoutes = require("./routes/productRoutes");
 const pickupRoutes = require("./routes/pickupRoutes");
 const authenticateFirebaseToken = require("./middleware/authenticateFirebaseToken");
@@ -24,7 +24,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // Set io instance in the order routes
-setIoInstance(io); // Pass the io instance to the order routes
+setIoInstance(io);
 
 // Middleware
 app.use(cors());
@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/drivers", driverRoutes);
-app.use("/api/orders", authenticateFirebaseToken, orderRoutes); // Use the orderRoutes with WebSocket
+app.use("/api/orders", authenticateFirebaseToken, orderRoutes); // Order routes with WebSocket support
 app.use("/api/products", authenticateFirebaseToken, productRoutes);
 app.use("/api/pickups", pickupRoutes);
 app.use((err, req, res, next) => {
@@ -45,7 +45,7 @@ app.use((err, req, res, next) => {
 mongoose
   .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error(err));
+  .catch((err) => console.error("MongoDB connection error:", err.message));
 
 // Start the server
 const PORT = process.env.PORT || 5000;

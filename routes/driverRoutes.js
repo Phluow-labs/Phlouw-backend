@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const Driver = require("../models/Driver");
+const Driver = require("../models/Driver")
+const { driverSockets } = require("../app"); 
 
 // Create a new driver
 router.post("/", async (req, res) => {
@@ -60,7 +61,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-
+// Driver login
 router.post("/login", async (req, res) => {
   const { fullName, code } = req.body;
 
@@ -74,11 +75,20 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    res.status(200).json(driver);
+    res.status(200).json(driver); // Firebase token will be used on the frontend for authentication
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
+// Register driver to receive WebSocket notifications
+router.post("/register", (req, res) => {
+  const { driverId, socketId } = req.body;
+
+  // Store driver socket ID for later communication
+  driverSockets[driverId] = socketId;
+
+  res.status(200).json({ message: "Driver registered for notifications" });
+});
 
 module.exports = router;
