@@ -8,10 +8,11 @@ const socketIo = require("socket.io");
 
 const userRoutes = require("./routes/userRoutes");
 const driverRoutes = require("./routes/driverRoutes");
-const { router: orderRoutes, setIoInstance } = require("./routes/orderRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 const productRoutes = require("./routes/productRoutes");
 const pickupRoutes = require("./routes/pickupRoutes");
 const authenticateFirebaseToken = require("./middleware/authenticateFirebaseToken");
+const { setIoInstance, initializeSocketHandlers } = require("./socketHandler");
 
 dotenv.config();
 
@@ -23,8 +24,11 @@ const server = http.createServer(app);
 // Create WebSocket instance
 const io = socketIo(server);
 
-// Set io instance in the order routes
+// Set the io instance for the orderRoutes
 setIoInstance(io);
+
+// Initialize WebSocket handlers (connections, registerDriver, etc.)
+initializeSocketHandlers();
 
 // Middleware
 app.use(cors());

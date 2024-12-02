@@ -3,37 +3,6 @@ const router = express.Router();
 const Order = require("../models/Order");
 const authenticateUser = require("../middleware/authenticateFirebaseToken");
 
-// Declare a variable for the WebSocket io instance and a map to track driver sockets
-let io;
-let driverSockets = {}; // Map to store driverId to socketId mappings
-
-// Add a setter for io
-const setIoInstance = (socketIoInstance) => {
-  io = socketIoInstance;
-};
-
-// Listen for driver connections and store their socketId by driverId
-io.on('connection', (socket) => {
-  console.log('A driver connected:', socket.id);
-
-  // Listen for when a driver registers their driverId
-  socket.on('registerDriver', (driverId) => {
-    driverSockets[driverId] = socket.id; // Store the socketId by driverId
-    console.log(`Driver ${driverId} registered with socket ID: ${socket.id}`);
-  });
-
-  // Handle driver disconnection
-  socket.on('disconnect', () => {
-    // Find and remove the driver from the driverSockets map
-    for (let driverId in driverSockets) {
-      if (driverSockets[driverId] === socket.id) {
-        delete driverSockets[driverId];
-        console.log(`Driver ${driverId} disconnected`);
-        break;
-      }
-    }
-  });
-});
 
 router.use(authenticateUser);
 
@@ -118,4 +87,4 @@ router.delete("/:id", async (req, res) => {
 });
 
 // Export the setter function to set the WebSocket instance
-module.exports = { router, setIoInstance };
+module.exports =router
